@@ -7,20 +7,17 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 
 const int delayval = 20; // timing delay in milliseconds
 
+// Define color constants as constant arrays
+const int HEAD_COLOR[] = {255, 0, 0};   // Red
+const int BASE_COLOR[] = {0, 255, 255}; // Cyan
+
+// Compact definition of LED start indices
+const int ledStartIndex[] = {
+    280, 279, 240, 239, 200, 199, 160, 159, 120, 119, 80, 79, 40, 39, 0};
+
 int redColor = 0;
 int greenColor = 0;
 int blueColor = 0;
-
-const int headRedColor = 255; // Head LED color
-const int headGreenColor = 0;
-const int headBlueColor = 0;
-
-const int defaultRedColor = 0; // Cyan base color
-const int defaultGreenColor = 255;
-const int defaultBlueColor = 255;
-
-const int ledStartIndex[] = {
-    280, 279, 240, 239, 200, 199, 160, 159, 120, 119, 80, 79, 40, 39, 0};
 
 int previousHeadLed = -1; // Variable to store the previous head LED
 
@@ -28,7 +25,6 @@ void setup()
 {
   pixels.begin();
   randomSeed(analogRead(0)); // Initialize random seed
-
   pixels.show();
 }
 
@@ -58,11 +54,11 @@ void ledRun(int ledColumnIndex)
       int prevLed = goingUp ? (startIndex + j - 1) : (startIndex - j + 1);
 
       // Set previous LED back to default color
-      pixels.setPixelColor(prevLed, pixels.Color(defaultRedColor, defaultGreenColor, defaultBlueColor));
+      pixels.setPixelColor(prevLed, pixels.Color(BASE_COLOR[0], BASE_COLOR[1], BASE_COLOR[2]));
     }
 
     // Set current LED to head color
-    pixels.setPixelColor(currentLed, pixels.Color(headRedColor, headGreenColor, headBlueColor));
+    pixels.setPixelColor(currentLed, pixels.Color(HEAD_COLOR[0], HEAD_COLOR[1], HEAD_COLOR[2]));
 
     pixels.show();
     delay(delayval);
