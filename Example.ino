@@ -13,13 +13,14 @@ const int fallDelay = 100; // delay for head falling down
 const int HEAD_COLOR[] = {255, 0, 0};   // Red
 const int BASE_COLOR[] = {0, 255, 255}; // Cyan
 const int OFF_COLOR[] = {0, 0, 0};      // Off/Black
-
+String incomingData = "";
+int StringCount = 0;
 // Compact definition of LED start indices
 const int ledStartIndex[] = {
     280, 279, 240, 239, 200, 199, 160, 159, 120, 119, 80, 79, 40, 39, 0};
 
 // Input array to simulate external input
-int inputArray[NUM_COLUMNS] = {0}; 
+int inputArray[NUM_COLUMNS] = {0};
 
 // Array to track the highest position for each column
 int highestPositions[NUM_COLUMNS] = {0};
@@ -29,6 +30,8 @@ int headPositions[NUM_COLUMNS] = {0};
 
 void setup()
 {
+  Serial.begin(115200);
+  Serial.setTimeout(3);
   pixels.begin();
   randomSeed(analogRead(0)); // Initialize random seed
   pixels.show();
@@ -114,10 +117,8 @@ void fallColumns()
         }
 
         // Find the new head position
-        int newHeadPosition = goingUp ? 
-          (startIndex + headPositions[i]) : 
-          (startIndex - headPositions[i]);
-        
+        int newHeadPosition = goingUp ? (startIndex + headPositions[i]) : (startIndex - headPositions[i]);
+
         // Keep the head LED at the bottom
         if (headPositions[i] == 0)
         {
@@ -134,9 +135,7 @@ void fallColumns()
           }
 
           // Set the new head LED before it reaches bottom
-          int newLedHeadPosition = goingUp ? 
-            (startIndex + headPositions[i] - 1) : 
-            (startIndex - headPositions[i] + 1);
+          int newLedHeadPosition = goingUp ? (startIndex + headPositions[i] - 1) : (startIndex - headPositions[i] + 1);
           pixels.setPixelColor(newLedHeadPosition, pixels.Color(HEAD_COLOR[0], HEAD_COLOR[1], HEAD_COLOR[2]));
         }
 
@@ -172,21 +171,42 @@ void fallColumns()
 void loop()
 {
   // Randomize the input array to simulate different frequencies
-  for (int i = 0; i < NUM_COLUMNS; i++)
+  if (Serial.available() > 0)
   {
-    inputArray[i] = random(0, 20);
+    incomingData += Serial.readString();
   }
-  shuffleInputArray(); // Additional randomization of input
 
-  // Update and display each column
-  for (int i = 0; i < NUM_COLUMNS; i++)
+  while (incomingData.length() > 0)
   {
-    updateColumn(i);
-  }
-  delay(delayval);
+    incomingData.replace("\n", "");
+    incomingData.trim();
+    int index = incomingData.indexOf(' ');
 
-  // Fall down effect for all columns simultaneously
+    if (index == -1) // No space found
+    {
+      inputArray[StringCount++] = incomingData.toInt();
+      break;
+    }
+    else
+    {
+      inputArray[StringCount++] = incomingData.substring(0, index).toInt();
+      incomingData = incomingData.substring(index + 1);
+    }
+  }
+
+  if (incomingData.length() > 0)
+  {
+
+    StringCount = 0;
+    incomingData = "";
+    // Update and display each column
+    for (int i = 0; i < NUM_COLUMNS; i++)
+    {
+      updateColumn(i);
+    }
+  }
+
   fallColumns();
 
-  delay(delayval);
+  // Fall down effect for all columns simultaneously
 }
