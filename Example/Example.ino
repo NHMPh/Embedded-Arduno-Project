@@ -81,10 +81,7 @@ void loop() {
     decreasePeakBar();
     prePeakDecreaseTime = currentTime;
   }
-  if (currentTime - preDataDecreaseTime >= dataDecreaseTimer) {
-    updateSpectrum();
-    preDataDecreaseTime = currentTime;
-  }
+
 }
 
 void showSpectrum() {
